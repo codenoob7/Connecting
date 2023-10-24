@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class TouchDetection : MonoBehaviour
 {
@@ -14,13 +15,13 @@ public class TouchDetection : MonoBehaviour
     [SerializeField] private float _MoveSpeed;
     [SerializeField] private float _distToDetect;
 
+    [SerializeField] private Transform _Camera;
+
     private bool _LcanMove;
     private bool _RcanMove;
-    private bool _IsSwiped;
     
     private Vector2 _leftLastPos;
     private Vector2 _rightLastPos;
-
     
     
     // Start is called before the first frame update
@@ -46,16 +47,6 @@ public class TouchDetection : MonoBehaviour
                     _leftLastPos = touch.position;
                     _FingerLeft = touch.fingerId; //store Id finger
                 }
-                else if (touch.phase == TouchPhase.Moved && touch.position.x <= Screen.width/2f)
-                {
-                    float dist = Mathf.Abs(touch.position.x - _leftLastPos.x);
-
-                    if (dist > _distToDetect && !_IsSwiped)
-                    {
-                        Debug.Log("Swiped Left...");
-                        _IsSwiped = true;
-                    }
-                }
                 
                 //For right half screen
                 if (touch.phase  == TouchPhase.Began && touch.position.x > Screen.width/2f && _FingerRight == -1) 
@@ -73,7 +64,6 @@ public class TouchDetection : MonoBehaviour
                     { 
                         Debug.Log("Left Touch Ended...");
                         _LcanMove = false;
-                        _IsSwiped = false;
                         _FingerLeft = -1;
                     } 
                     else if(touch.fingerId == _FingerRight) 
@@ -84,6 +74,12 @@ public class TouchDetection : MonoBehaviour
                     }
                 }
             }
+        }
+
+
+        if (_Camera.position.y > _lRb.transform.localPosition.y + 10f && _Camera.transform.position.y > _rRb.transform.localPosition.y + 10f)
+        {
+            Debug.Log("Loose...");
         }
     }
 
@@ -113,5 +109,11 @@ public class TouchDetection : MonoBehaviour
     {
         rb.velocity = new Vector2(0, _MoveSpeed);
         //_Connector.Translate(0,_MoveSpeed * Time.deltaTime,0);
+    }
+
+    public void StopMovement()
+    {
+        _lRb.velocity = Vector2.zero;
+        _rRb.velocity = Vector2.zero;
     }
 }
